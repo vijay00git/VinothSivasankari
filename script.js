@@ -1,42 +1,3 @@
-// Welcome Screen Logic
-document.addEventListener('DOMContentLoaded', () => {
-    const openBtn = document.getElementById('open-invitation');
-    if(openBtn) {
-        openBtn.addEventListener('click', function() {
-            // Hide welcome screen
-            document.getElementById('welcome-screen').classList.add('hidden');
-            // Allow scrolling
-            document.body.classList.remove('no-scroll');
-            
-            // Trigger a massive confetti burst!
-            var duration = 3 * 1000;
-            var animationEnd = Date.now() + duration;
-            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 10000 };
-
-            function randomInRange(min, max) {
-                return Math.random() * (max - min) + min;
-            }
-
-            var interval = setInterval(function() {
-                var timeLeft = animationEnd - Date.now();
-
-                if (timeLeft <= 0) {
-                    return clearInterval(interval);
-                }
-
-                var particleCount = 50 * (timeLeft / duration);
-                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-            }, 250);
-
-            // Refresh AOS animations after the overlay is gone
-            setTimeout(() => {
-                AOS.refresh();
-            }, 500);
-        });
-    }
-});
-
 // Initialize AOS (Animate On Scroll)
 AOS.init({
     once: false, // whether animation should happen only once - while scrolling down
@@ -67,35 +28,6 @@ function createHearts() {
 
 createHearts();
 
-// Sparkle Generator
-function createSparkles() {
-    const container = document.getElementById('sparkles');
-    if (!container) return;
-    const sparkleCount = 30;
-
-    for (let i = 0; i < sparkleCount; i++) {
-        let sparkle = document.createElement('div');
-        sparkle.classList.add('sparkle');
-        
-        let leftPosition = Math.random() * 100;
-        let topPosition = Math.random() * 100;
-        let size = Math.random() * 4 + 2;
-        let animDuration = Math.random() * 2 + 2;
-        let animDelay = Math.random() * 5;
-
-        sparkle.style.left = leftPosition + 'vw';
-        sparkle.style.top = topPosition + 'vh';
-        sparkle.style.width = size + 'px';
-        sparkle.style.height = size + 'px';
-        sparkle.style.animationDuration = animDuration + 's';
-        sparkle.style.animationDelay = animDelay + 's';
-        
-        container.appendChild(sparkle);
-    }
-}
-
-createSparkles();
-
 // Countdown Timer
 const weddingDate = new Date("Jun 18, 2026 07:30:00").getTime();
 
@@ -122,34 +54,148 @@ const countdownTimer = setInterval(function() {
     }
 }, 1000);
 
-// Confetti Button Effect
-document.getElementById('blessingBtn').addEventListener('click', function() {
-    var duration = 3 * 1000;
-    var animationEnd = Date.now() + duration;
-    var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
+// Lightbox Logic
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightbox-img');
+const closeLightboxBtn = document.querySelector('.close-lightbox');
+const galleryImages = document.querySelectorAll('.gallery-img, .couple-img');
 
-    function randomInRange(min, max) {
-        return Math.random() * (max - min) + min;
-    }
+if (lightbox) {
+    galleryImages.forEach(img => {
+        img.style.cursor = 'pointer';
+        img.addEventListener('click', function() {
+            lightbox.style.display = 'flex';
+            lightboxImg.src = this.src;
+            document.body.style.overflow = 'hidden';
+        });
+    });
 
-    var interval = setInterval(function() {
-        var timeLeft = animationEnd - Date.now();
+    closeLightboxBtn.addEventListener('click', function() {
+        lightbox.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    });
 
-        if (timeLeft <= 0) {
-            return clearInterval(interval);
+    lightbox.addEventListener('click', function(e) {
+        if (e.target !== lightboxImg) {
+            lightbox.style.display = 'none';
+            document.body.style.overflow = 'auto';
         }
+    });
+}
 
-        var particleCount = 50 * (timeLeft / duration);
-        // since particles fall down, start a bit higher than random
-        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-    }, 250);
+// RSVP Modal Logic
+const rsvpModal = document.getElementById('rsvp-modal');
+const blessingBtn = document.getElementById('blessingBtn');
+const closeModalBtn = document.querySelector('.close-modal');
+const rsvpForm = document.getElementById('rsvp-form');
+const formSuccess = document.getElementById('form-success');
 
-    // Change button text temporarily
-    const btn = this;
-    const originalText = btn.innerHTML;
-    btn.innerHTML = "நன்றி! / Thank you! ❤️";
-    setTimeout(() => {
-        btn.innerHTML = originalText;
-    }, 3000);
+if(blessingBtn && rsvpModal) {
+    blessingBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        rsvpModal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    });
+}
+
+if(closeModalBtn) {
+    closeModalBtn.addEventListener('click', function() {
+        rsvpModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        setTimeout(() => {
+            rsvpForm.style.display = 'block';
+            formSuccess.style.display = 'none';
+            rsvpForm.reset();
+        }, 300);
+    });
+}
+
+window.addEventListener('click', function(e) {
+    if (e.target === rsvpModal) {
+        rsvpModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
 });
+
+if(rsvpForm) {
+    rsvpForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const submitBtn = rsvpForm.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.innerHTML = "Sending... ⏳";
+        submitBtn.disabled = true;
+
+        const guestName = document.getElementById('guest-name').value;
+        const guestMessage = document.getElementById('guest-message').value;
+
+        // --- FORM COLLECTION SETUP ---
+        // 1. Go to https://formspree.io/ and create a free account
+        // 2. Create a new form
+        // 3. Copy the 8-character form ID from the URL they give you
+        // 4. Replace 'YOUR_FORM_ID' below with that ID
+        const formspreeEndpoint = "https://formspree.io/f/mlgzkaqj";
+
+        fetch(formspreeEndpoint, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                Name: guestName,
+                Message: guestMessage
+            })
+        }).then(response => {
+            if (response.ok || formspreeEndpoint.includes("YOUR_FORM_ID")) {
+                // If it succeeds (or if you are just testing without an ID yet)
+                rsvpForm.style.display = 'none';
+                formSuccess.style.display = 'block';
+                
+                // Confetti!
+                var duration = 3 * 1000;
+                var animationEnd = Date.now() + duration;
+                var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 10001 };
+
+                function randomInRange(min, max) {
+                    return Math.random() * (max - min) + min;
+                }
+
+                var interval = setInterval(function() {
+                    var timeLeft = animationEnd - Date.now();
+                    if (timeLeft <= 0) {
+                        return clearInterval(interval);
+                    }
+                    var particleCount = 50 * (timeLeft / duration);
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+                }, 250);
+
+                setTimeout(() => {
+                    rsvpModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                    setTimeout(() => {
+                        rsvpForm.style.display = 'block';
+                        formSuccess.style.display = 'none';
+                        submitBtn.innerHTML = originalBtnText;
+                        submitBtn.disabled = false;
+                        rsvpForm.reset();
+                    }, 300);
+                }, 4000);
+            } else {
+                alert("Oops! There was a problem submitting your wishes. Please try again.");
+                submitBtn.innerHTML = originalBtnText;
+                submitBtn.disabled = false;
+            }
+        }).catch(error => {
+            // Note: If testing locally without a valid form ID, it might fall here
+            if(formspreeEndpoint.includes("YOUR_FORM_ID")) {
+                alert("To actually collect responses, please replace 'YOUR_FORM_ID' in script.js with a real Formspree ID!");
+            } else {
+                alert("Oops! There was a problem submitting your wishes. Please check your connection.");
+            }
+            submitBtn.innerHTML = originalBtnText;
+            submitBtn.disabled = false;
+        });
+    });
+}
