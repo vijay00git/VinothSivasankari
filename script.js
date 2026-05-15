@@ -28,6 +28,35 @@ function createHearts() {
 
 createHearts();
 
+// Background Music Autoplay
+function enableAudioAutoplay() {
+    const audio = document.getElementById('background-music');
+    if (audio) {
+        // Try to play immediately (will be muted due to browser policies)
+        audio.play().catch(error => {
+            console.log('Audio autoplay muted - will unmute on user interaction');
+        });
+        
+        // Remove muted attribute on first user interaction to comply with browser policies
+        document.addEventListener('click', function() {
+            audio.muted = false;
+            audio.play().catch(error => {
+                console.log('Autoplay prevented by browser');
+            });
+        }, { once: true });
+        
+        // Also unmute on first touch for mobile devices
+        document.addEventListener('touchstart', function() {
+            audio.muted = false;
+            audio.play().catch(error => {
+                console.log('Autoplay prevented by browser');
+            });
+        }, { once: true });
+    }
+}
+
+enableAudioAutoplay();
+
 // Countdown Timer
 const weddingDate = new Date("Jun 18, 2026 07:30:00").getTime();
 
