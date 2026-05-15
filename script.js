@@ -28,34 +28,56 @@ function createHearts() {
 
 createHearts();
 
-// Background Music Autoplay
-function enableAudioAutoplay() {
+// Audio Control & Welcome Overlay
+function initAudioControl() {
     const audio = document.getElementById('background-music');
-    if (audio) {
-        // Try to play immediately (will be muted due to browser policies)
-        audio.play().catch(error => {
-            console.log('Audio autoplay muted - will unmute on user interaction');
+    const welcomeOverlay = document.getElementById('welcome-overlay');
+    const openBtn = document.getElementById('open-invitation');
+    const musicBtn = document.getElementById('music-control');
+    
+    if (!audio || !welcomeOverlay || !openBtn || !musicBtn) return;
+
+    // Initially hide scrollbar while overlay is active
+    document.body.style.overflow = 'hidden';
+
+    openBtn.addEventListener('click', function() {
+        // Start playing music
+        audio.play().then(() => {
+            console.log('Music started playing');
+            musicBtn.classList.add('playing');
+        }).catch(error => {
+            console.log('Audio playback failed:', error);
         });
+
+        // Fade out overlay
+        welcomeOverlay.classList.add('fade-out');
         
-        // Remove muted attribute on first user interaction to comply with browser policies
-        document.addEventListener('click', function() {
-            audio.muted = false;
-            audio.play().catch(error => {
-                console.log('Autoplay prevented by browser');
-            });
-        }, { once: true });
-        
-        // Also unmute on first touch for mobile devices
-        document.addEventListener('touchstart', function() {
-            audio.muted = false;
-            audio.play().catch(error => {
-                console.log('Autoplay prevented by browser');
-            });
-        }, { once: true });
-    }
+        // Restore scrolling
+        document.body.style.overflow = 'auto';
+
+        // Set a small delay before removing the overlay from DOM if desired, 
+        // but visibility:hidden is usually enough with transition
+        setTimeout(() => {
+            welcomeOverlay.style.display = 'none';
+        }, 800);
+    });
+
+    musicBtn.addEventListener('click', function() {
+        if (audio.paused) {
+            audio.play();
+            musicBtn.classList.remove('paused');
+            musicBtn.classList.add('playing');
+            musicBtn.querySelector('.icon').innerText = '🎵';
+        } else {
+            audio.pause();
+            musicBtn.classList.remove('playing');
+            musicBtn.classList.add('paused');
+            musicBtn.querySelector('.icon').innerText = '🔇';
+        }
+    });
 }
 
-enableAudioAutoplay();
+initAudioControl();
 
 // Countdown Timer
 const weddingDate = new Date("Jun 18, 2026 07:30:00").getTime();
