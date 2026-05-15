@@ -28,36 +28,44 @@ function createHearts() {
 
 createHearts();
 
-// Audio Control
+// Audio Control & Welcome Overlay
 function initAudioControl() {
     const audio = document.getElementById('background-music');
+    const welcomeOverlay = document.getElementById('welcome-overlay');
+    const openBtn = document.getElementById('open-invitation');
     const musicBtn = document.getElementById('music-control');
     
-    if (!audio || !musicBtn) return;
+    if (!audio || !welcomeOverlay || !openBtn || !musicBtn) return;
 
-    // Try to play immediately (will be muted initially)
-    audio.play().catch(error => {
-        console.log('Autoplay blocked - will play on interaction');
-    });
+    // Initially hide scrollbar while overlay is active
+    document.body.style.overflow = 'hidden';
 
-    // Unmute and ensure playing on first user interaction
-    const unmuteOnInteraction = () => {
-        audio.muted = false;
+    openBtn.addEventListener('click', function() {
+        // Start playing music
         audio.play().then(() => {
+            console.log('Music started playing');
             musicBtn.classList.add('playing');
             musicBtn.querySelector('.icon').innerText = '🎵';
+        }).catch(error => {
+            console.log('Audio playback failed:', error);
+            // Fallback for some browsers: they might need a click on the music button itself
         });
-        document.removeEventListener('click', unmuteOnInteraction);
-        document.removeEventListener('touchstart', unmuteOnInteraction);
-    };
 
-    document.addEventListener('click', unmuteOnInteraction);
-    document.addEventListener('touchstart', unmuteOnInteraction);
+        // Fade out overlay
+        welcomeOverlay.classList.add('fade-out');
+        
+        // Restore scrolling
+        document.body.style.overflow = 'auto';
+
+        // Set a small delay before removing the overlay from DOM
+        setTimeout(() => {
+            welcomeOverlay.style.display = 'none';
+        }, 800);
+    });
 
     musicBtn.addEventListener('click', function(e) {
-        e.stopPropagation(); // Prevent trigger the unmuteOnInteraction if still active
+        e.stopPropagation();
         if (audio.paused) {
-            audio.muted = false;
             audio.play();
             musicBtn.classList.remove('paused');
             musicBtn.classList.add('playing');
